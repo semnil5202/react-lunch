@@ -20,13 +20,6 @@ export default class RestaurantListContainer extends Component<
     restaurantID: 0,
   };
 
-  handleChangeFilter = (filterOptions: {
-    category: Category;
-    sort: string;
-  }) => {
-    this.setState({ ...filterOptions });
-  };
-
   isCategory = (category: string): category is Category => {
     if (
       ['전체', '한식', '중식', '일식', '양식', '아시안', '기타'].includes(
