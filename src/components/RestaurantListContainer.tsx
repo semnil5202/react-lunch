@@ -1,86 +1,71 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import RestaurantList from './RestaurantList';
 import FilterBar from './FilterBar';
 import { Category } from '../types/RestaurantDetail';
 import Modal from './Modal';
 
-interface RestaurantListContainerStates {
-  category: Category;
-  sort: string;
-  restaurantID: number;
-}
+const RestaurantListContainer = () => {
+  const [category, setCategory] = useState<Category>('전체');
+  const [sort, setSort] = useState<string>('이름순');
+  const [restaurantId, setRestaurantId] = useState<number>(0);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-export default class RestaurantListContainer extends Component<
-  object,
-  RestaurantListContainerStates
-> {
-  state: RestaurantListContainerStates = {
-    category: '전체',
-    sort: 'name',
-    restaurantID: 0,
-  };
+  const isCategory = (category: string): category is Category => {
+    const categoris = [
+      '전체',
+      '한식',
+      '중식',
+      '일식',
+      '양식',
+      '아시안',
+      '기타',
+    ];
 
-  isCategory = (category: string): category is Category => {
-    if (
-      ['전체', '한식', '중식', '일식', '양식', '아시안', '기타'].includes(
-        category
-      )
-    ) {
-      return true;
-    }
+    if (categoris.includes(category)) return true;
     return false;
   };
 
-  handleCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCategory = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const category = event.target.value;
 
-    if (!this.isCategory(category)) return;
+    if (!isCategory(category)) return;
 
-    {
-      this.setState({
-        ...this.state,
-        category,
-      });
-    }
+    setCategory(category);
   };
 
-  handleSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const sort = event.target.value;
 
-    this.setState({
-      ...this.state,
-      sort,
-    });
+    setSort(sort);
   };
 
-  handleOpenModal = (event: React.MouseEvent<HTMLUListElement>) => {
+  const handleOpenModal = (event: React.MouseEvent<HTMLUListElement>) => {
     const li = (event.target as HTMLElement).closest('li');
-    if (!li) return;
-    const restaurantID = Number(li.id);
 
-    this.setState({ ...this.state, restaurantID });
+    if (!li) return;
+
+    const restaurantId = Number(li.id);
+
+    setIsModalOpen(true);
+    setRestaurantId(restaurantId);
   };
 
-  render() {
-    const { category, sort, restaurantID } = this.state;
+  return (
+    <>
+      <FilterBar
+        onChangeCategory={handleCategory}
+        onChangeSort={handleSort}
+      ></FilterBar>
+      <RestaurantList
+        category={category}
+        sort={sort}
+        onOpenModal={handleOpenModal}
+      ></RestaurantList>
+      {isModalOpen && (
+        <Modal isModalOpen={setIsModalOpen} restaurantId={restaurantId}></Modal>
+      )}
+    </>
+  );
+};
 
-    return (
-      <>
-        <FilterBar
-          onChangeCategory={this.handleCategory}
-          onChangeSort={this.handleSort}
-        ></FilterBar>
-        <RestaurantList
-          category={category}
-          sort={sort}
-          onOpenModal={this.handleOpenModal}
-        ></RestaurantList>
-        <Modal
-          category={category}
-          sort={sort}
-          restaurantID={restaurantID}
-        ></Modal>
-      </>
-    );
-  }
-}
+export default RestaurantListContainer;
